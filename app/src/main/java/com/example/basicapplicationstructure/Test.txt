@@ -1,0 +1,184 @@
+package com.example.basicapplicationstructure.data.localDataSource
+
+import androidx.room.Dao
+import com.example.basicapplicationstructure.data.remoteDataSource.User
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface UserDao {
+
+    suspend fun getUserDataBasedOnId(id: String) : User?
+
+    suspend fun addUserData(user: User)
+}
+
+package com.example.basicapplicationstructure.data.remoteDataSource
+
+data class User(
+    val id:Int,
+    val name: String,
+    val isPremiumUser: Boolean = false
+)
+
+
+package com.example.basicapplicationstructure.data
+
+import com.example.basicapplicationstructure.data.localDataSource.UserDao
+import com.example.basicapplicationstructure.data.remoteDataSource.User
+import com.example.basicapplicationstructure.network.ApiInterface
+import com.example.basicapplicationstructure.network.NetworkResponse
+import com.example.basicapplicationstructure.network.invokeOnStatus
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
+
+class UserRepositoryImp @Inject constructor(val apiInterface: ApiInterface, val userDao: UserDao): UserRepositoryInterface {
+
+    override fun getUserDetails(id: String): Flow<NetworkResponse<User>> {
+
+        return flow {
+            emit(NetworkResponse.Loading())
+            try {
+                val response = userDao.getUserDataBasedOnId(id)
+                if (response == null){
+                    val responseFromNetwork = apiInterface.getUserDataById(id = id)
+
+                    responseFromNetwork.code().invokeOnStatus(
+                        onSuccess = {
+                            responseFromNetwork.body()?.let {
+                                emit(NetworkResponse.Success(data = it))
+
+                                userDao.addUserData(user = it)
+                            }
+                        },
+                        onError = {
+                            emit(NetworkResponse.Error(responseFromNetwork.errorBody().toString()))
+                        }
+                    )
+                }
+                else{
+                    emit(NetworkResponse.Success(response))
+                }
+            }catch (ex: Exception){
+                emit(NetworkResponse.Error("data not found or someth $ex"))
+            }
+        }
+    }
+}
+
+package com.example.basicapplicationstructure.data
+
+import com.example.basicapplicationstructure.data.remoteDataSource.User
+import com.example.basicapplicationstructure.network.NetworkResponse
+import kotlinx.coroutines.flow.Flow
+
+interface UserRepositoryInterface {
+
+    fun getUserDetails(id: String) : Flow<NetworkResponse<User>>
+}
+
+package com.example.basicapplicationstructure.network
+
+import com.example.basicapplicationstructure.data.remoteDataSource.User
+import retrofit2.Response
+import retrofit2.http.GET
+
+interface ApiInterface {
+
+    @GET("/sample")
+    suspend fun getUserDataById(id: String): Response<User>
+}
+
+package com.example.basicapplicationstructure.presentation
+
+data class UserState(
+    val isLoading: Boolean = false,
+    val isPremiumUser : Boolean = false
+)
+
+
+package com.example.basicapplicationstructure.presentation
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.basicapplicationstructure.data.UserRepositoryInterface
+import com.example.basicapplicationstructure.network.NetworkResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class UserViewModel @Inject constructor(val repositoryInterface: UserRepositoryInterface): ViewModel() {
+
+    private val _state = MutableStateFlow(UserState(isLoading = false))
+    val state : StateFlow<UserState> = _state
+
+
+    fun getUserBasedOnId(id: String){
+        viewModelScope.launch{
+
+            repositoryInterface.getUserDetails(id).collectLatest {
+                when(it){
+                    is NetworkResponse.Loading -> {
+                        _state.value = state.value.copy(isLoading = true)
+                    }
+                    is NetworkResponse.Success -> {
+                        _state.value = state.value.copy(isLoading = false, isPremiumUser = it.data.isPremiumUser)
+                    }
+                    is NetworkResponse.Error -> {
+                        _state.value = state.value.copy(isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+package com.example.basicapplicationstructure
+
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+fun main() = runBlocking {
+
+    launch {
+        val ans = sample()
+        val ans2 = sample2()
+
+        println(ans + ans2)
+    }
+
+
+    val job1 = async {
+        sample()
+    }
+
+    val job2 = async {
+        sample2()
+    }
+
+    println(job1.await() + job2.await())
+}
+
+suspend fun sample(): Int {
+    delay(10000)
+    return 10
+}
+
+suspend fun sample2(): Int {
+    delay(20000)
+    return 20
+}
