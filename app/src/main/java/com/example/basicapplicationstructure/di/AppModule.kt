@@ -1,10 +1,15 @@
 package com.example.basicapplicationstructure.di
 
+import android.content.Context
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.basicapplicationstructure.data.localDataSource.MoviesAppDatabase
 import com.example.basicapplicationstructure.network.ApiInterface
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,10 +40,20 @@ object AppModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://sample/")
+            .baseUrl("https://dummyjson.com/c/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(ApiInterface::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providesAppDataBase(@ApplicationContext context: Context): MoviesAppDatabase {
+        return Room.databaseBuilder(
+            context = context,
+            klass = MoviesAppDatabase::class.java,
+            name = "movies-db"
+        ).build()
     }
 }
