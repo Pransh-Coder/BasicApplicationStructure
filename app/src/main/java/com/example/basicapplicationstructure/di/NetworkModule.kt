@@ -2,7 +2,6 @@ package com.example.basicapplicationstructure.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.example.basicapplicationstructure.data.localDataSource.MoviesAppDatabase
 import com.example.basicapplicationstructure.network.ApiInterface
 import com.google.gson.GsonBuilder
@@ -21,7 +20,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 //better naming conventions, as it is only providing instances for network
-object AppModule {
+object NetworkModule {
 
     @Provides
     @Singleton

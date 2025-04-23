@@ -41,15 +41,6 @@ class MoviesViewModel @Inject constructor(
             getLocalMoviesUseCase.invoke().collectLatest {
                 Log.e(TAG, "getMoviesList: it = $it")
                 when(it){
-                    is Resource.Error -> {
-                        _state.update {
-                            it.copy(isLoading = false)
-                        }
-                        _errors.send(it.errorMessage)
-                    }
-                    is Resource.NoInternetException -> {
-                        _errors.send("No Internet Connection!")
-                    }
                     is Resource.Success -> {
                         if (it.data.isNotEmpty()){
                             Log.e(TAG, "getMoviesList: data is not empty...", )
@@ -59,6 +50,19 @@ class MoviesViewModel @Inject constructor(
                             Log.e(TAG, "getMoviesList: data is empty fetching from network", )
                             fetchDataFromServer()
                         }
+                    }
+                    is Resource.NoInternetException -> {
+                        _state.update {
+                            it.copy(isLoading = false)
+                        }
+
+                        _errors.send("No Internet Connection!")
+                    }
+                    is Resource.Error -> {
+                        _state.update {
+                            it.copy(isLoading = false)
+                        }
+                        _errors.send(it.errorMessage)
                     }
                 }
             }
@@ -70,17 +74,20 @@ class MoviesViewModel @Inject constructor(
             val networkResponse = moviesUseCase.invoke()
             Log.e(TAG, "fetchDataFromServer: networkResponse = $networkResponse")
             when(networkResponse){
+                is Resource.Success -> {
+                    _state.value = state.value.copy(isLoading = false, moviesList = networkResponse.data)
+                }
+                is Resource.NoInternetException -> {
+                    _state.update {
+                        it.copy(isLoading = false)
+                    }
+                    _errors.send("No Internet Connection!")
+                }
                 is Resource.Error -> {
                     _state.update {
                         it.copy(isLoading = false)
                     }
                     _errors.send(networkResponse.errorMessage)
-                }
-                is Resource.NoInternetException -> {
-                    _errors.send("No Internet Connection!")
-                }
-                is Resource.Success -> {
-                    _state.value = state.value.copy(isLoading = false, moviesList = networkResponse.data)
                 }
             }
         }
