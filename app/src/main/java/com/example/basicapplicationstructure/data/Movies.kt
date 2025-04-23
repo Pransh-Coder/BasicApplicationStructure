@@ -2,6 +2,7 @@ package com.example.basicapplicationstructure.data
 
 import com.google.gson.annotations.SerializedName
 
+// gson vs Moshi
 data class Movies(
     @SerializedName("Title") val title: String,
     @SerializedName("Year") val year: String,

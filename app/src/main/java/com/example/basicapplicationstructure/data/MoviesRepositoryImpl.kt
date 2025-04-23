@@ -10,14 +10,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
+//Remote data source & Local data source Sigle responsibilty
 class MoviesRepositoryImpl @Inject constructor(
     private val apiInterface: ApiInterface,
     private val dao: MoviesDao,
 ) : MoviesRepositoryInterface {
 
+    //not giving concrete implementation
+
     override fun getMoviesList(): Flow<NetworkResponse<List<MoviesMapper>>> {
+        //why flow ?
         return flow {
-            emit(NetworkResponse.Loading())
+            //todo remove it
+            emit(NetworkResponse.Loading()) // its a UI component
+            //get the data from db 1st & if it is not there then get from network
+            //it is having 2 source of truth
+            // getting data from network should not be flow ? becoz its not stream of data
+
             try {
                 val response = apiInterface.getMoviesListFromServer()
                 response.code().invokeOnStatus(
@@ -38,6 +47,7 @@ class MoviesRepositoryImpl @Inject constructor(
                         }
                         emit(NetworkResponse.Success(data = moviesMappedList ?: emptyList()))
 
+                        //todo it should not be here in a separate class
                         insertAllMoviesInDatabase(moviesMappedList)
                     },
                     onError = {
@@ -50,6 +60,7 @@ class MoviesRepositoryImpl @Inject constructor(
 
                 emit(NetworkResponse.Loading())
 
+                //alot of business logic is here
                 if (dao.getAllMoviesList().isNotEmpty()) {
                     Log.e(TAG, "getMoviesList from Database: ")
                     val moviesListFromDb = dao.getAllMoviesList()

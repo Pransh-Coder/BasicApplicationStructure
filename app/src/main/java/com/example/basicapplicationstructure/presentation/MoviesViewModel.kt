@@ -21,6 +21,7 @@ class MoviesViewModel @Inject constructor(private val moviesUseCase: MoviesUseCa
     private val _state = MutableStateFlow(MoviesState(isLoading = false))
     val state : StateFlow<MoviesState> = _state
 
+    //use case of channel & why?
     private val _errors = Channel<String>()
     val error = _errors.receiveAsFlow()
 

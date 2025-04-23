@@ -9,7 +9,12 @@ import javax.inject.Inject
 
 class MoviesUseCase @Inject constructor(private val moviesRepositoryInterface: MoviesRepositoryInterface) {
 
-    operator fun invoke(): Flow<NetworkResponse<List<MoviesMapper>>>{
+    // it should handle actual business logic like saving the data in db or retriving it
+
+    //how to get the data from where?
+
+    operator fun invoke(): Flow<NetworkResponse<List<MoviesMapper>>>{       //Movies  MovieMapper - Movies || Movies - MoviesResponse
+        //its work of presentation layer
        return moviesRepositoryInterface.getMoviesList().transform {
            val sortedListByName = it.data?.sortedBy { it.title }
            when(it){

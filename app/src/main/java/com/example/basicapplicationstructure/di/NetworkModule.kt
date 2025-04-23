@@ -18,10 +18,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-@Module
+
 @InstallIn(SingletonComponent::class)
-//better naming conventions, as it is only providing instances for network
-object AppModule {
+//better naming instead it should network module
+object NetworkModule {
 
     @Provides
     @Singleton
@@ -46,15 +46,5 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(ApiInterface::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun providesAppDataBase(@ApplicationContext context: Context): MoviesAppDatabase {
-        return Room.databaseBuilder(
-            context = context,
-            klass = MoviesAppDatabase::class.java,
-            name = "movies-db"
-        ).build()
     }
 }
