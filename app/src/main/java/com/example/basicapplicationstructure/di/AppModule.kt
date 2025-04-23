@@ -52,9 +52,11 @@ object AppModule {
     @Singleton
     fun providesAppDataBase(@ApplicationContext context: Context): MoviesAppDatabase {
         return Room.databaseBuilder(
-            context = context,
-            klass = MoviesAppDatabase::class.java,
-            name = "movies-db"
-        ).build()
+                context = context,
+                klass = MoviesAppDatabase::class.java,
+                name = "movies-db"
+            )
+            .fallbackToDestructiveMigration(false)
+            .build()
     }
 }

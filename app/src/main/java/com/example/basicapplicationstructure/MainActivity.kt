@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.example.basicapplicationstructure.data.MoviesMapper
+import com.example.basicapplicationstructure.presentation.MoviesData
 import com.example.basicapplicationstructure.presentation.MoviesViewModel
 import com.example.basicapplicationstructure.ui.theme.BasicApplicationStructureTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -106,7 +106,7 @@ fun GreetingPreview() {
 }
 
 @Composable
-fun MoviesListComposable(modifier: Modifier = Modifier, moviesList: List<MoviesMapper>? = listOf<MoviesMapper>()) {
+fun MoviesListComposable(modifier: Modifier = Modifier, moviesList: List<MoviesData>? = listOf<MoviesData>()) {
 
     LazyColumn(modifier = modifier.fillMaxWidth()) {
         item {
@@ -122,14 +122,14 @@ fun MoviesListComposable(modifier: Modifier = Modifier, moviesList: List<MoviesM
             }
         }
 
-        items(moviesList?:emptyList<MoviesMapper>()) {
+        items(moviesList?:emptyList<MoviesData>()) {
             MovieItem(it)
         }
     }
 }
 
 @Composable
-fun MovieItem(movie: MoviesMapper) {
+fun MovieItem(movie: MoviesData) {
 
     Card(
         modifier = Modifier
@@ -225,7 +225,7 @@ fun MovieItem(movie: MoviesMapper) {
 @Preview
 @Composable
 private fun PreviewMovieItem() {
-    val mockData = MoviesMapper(
+    val mockData = MoviesData(
         title = "Avatar",
         year = "2022",
         rated = "PG-13",
@@ -251,7 +251,7 @@ private fun PreviewMovieItem() {
 @Preview
 @Composable
 private fun PreviewMoviesListComposable() {
-    val mockData = MoviesMapper(
+    val mockData = MoviesData(
         title = "Avatar",
         year = "2022",
         rated = "PG-13",
@@ -271,7 +271,7 @@ private fun PreviewMoviesListComposable() {
         )
     )
 
-    val list = listOf<MoviesMapper>(mockData,mockData,mockData,mockData,mockData,mockData,mockData)
+    val list = listOf<MoviesData>(mockData,mockData,mockData,mockData,mockData,mockData,mockData)
 
     MoviesListComposable(moviesList = list)
 }

@@ -15,4 +15,5 @@ data class MoviesEntity(
     val language: String,
     val imdbRating: String,
     val type: String,
+    val image: String
 )

@@ -1,24 +1,22 @@
 package com.example.basicapplicationstructure.data
 
-import android.util.Log
-import com.example.basicapplicationstructure.data.localDataSource.MoviesDao
+import com.example.basicapplicationstructure.data.localDataSource.LocalDataSource
 import com.example.basicapplicationstructure.data.localDataSource.MoviesEntity
-import com.example.basicapplicationstructure.network.ApiInterface
-import com.example.basicapplicationstructure.network.NetworkResponse
-import com.example.basicapplicationstructure.network.invokeOnStatus
+import com.example.basicapplicationstructure.data.remoteDataSource.MoviesResponse
+import com.example.basicapplicationstructure.data.remoteDataSource.NetworkDataSource
+import com.example.basicapplicationstructure.network.Resource
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 //Remote data source & Local data source Sigle responsibilty
 class MoviesRepositoryImpl @Inject constructor(
-    private val apiInterface: ApiInterface,
-    private val dao: MoviesDao,
+    private val networkDataSource: NetworkDataSource,
+    private val localDataSource: LocalDataSource,
 ) : MoviesRepositoryInterface {
 
     //not giving concrete implementation
 
-    override fun getMoviesList(): Flow<NetworkResponse<List<MoviesMapper>>> {
+    /*override fun getMoviesList(): Flow<NetworkResponse<List<MoviesMapper>>> {
         //why flow ?
         return flow {
             //todo remove it
@@ -84,9 +82,18 @@ class MoviesRepositoryImpl @Inject constructor(
                 }
             }
         }
+    }*/
+
+    override suspend fun getMoviesListFromNetwork(): Resource<List<MoviesResponse>> {
+        return networkDataSource.getMoviesListFromNetwork()
     }
 
-    private suspend fun insertAllMoviesInDatabase(moviesMappedList: List<MoviesMapper>?) {
+    //todo doubt - Should we not have the write function in the repository
+    override suspend fun getMoviesListFromLocalDB(): Flow<Resource<List<MoviesEntity>>> {
+        return localDataSource.getMoviesListFromDB()
+    }
+
+   /* private suspend fun insertAllMoviesInDatabase(moviesMappedList: List<MoviesData>?) {
         val moviesEntityList = moviesMappedList?.map {
             MoviesEntity(
                 title = it.title,
@@ -102,7 +109,7 @@ class MoviesRepositoryImpl @Inject constructor(
         } ?: emptyList()
 
         dao.insertAllMovies(moviesEntityList)
-    }
+    }*/
 
     companion object {
         private const val TAG = "MoviesRepositoryImpl"

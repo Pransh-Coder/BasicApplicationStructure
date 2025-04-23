@@ -1,11 +1,9 @@
-package com.example.basicapplicationstructure.data
-
-import com.google.gson.annotations.SerializedName
+package com.example.basicapplicationstructure.presentation
 
 // todo It should be in presentation layer
 // don't copy
 // Naming conventions (can be improved rename it to Movies)
-data class MoviesMapper(
+data class MoviesData(
     val title: String,
     val year: String,
     val rated: String,

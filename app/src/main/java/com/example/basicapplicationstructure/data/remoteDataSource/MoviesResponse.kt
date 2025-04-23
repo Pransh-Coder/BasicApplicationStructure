@@ -1,9 +1,9 @@
-package com.example.basicapplicationstructure.data
+package com.example.basicapplicationstructure.data.remoteDataSource
 
 import com.google.gson.annotations.SerializedName
 
 // gson vs Moshi
-data class Movies(
+data class MoviesResponse(
     @SerializedName("Title") val title: String,
     @SerializedName("Year") val year: String,
     @SerializedName("Rated") val rated: String,
