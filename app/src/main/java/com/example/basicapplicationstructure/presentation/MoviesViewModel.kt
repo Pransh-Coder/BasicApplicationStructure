@@ -72,7 +72,9 @@ class MoviesViewModel @Inject constructor(
     private fun fetchDataFromServer(){
         viewModelScope.launch {
             val networkResponse = moviesUseCase.invoke()
+
             Log.e(TAG, "fetchDataFromServer: networkResponse = $networkResponse")
+
             when(networkResponse){
                 is Resource.Success -> {
                     _state.value = state.value.copy(isLoading = false, moviesList = networkResponse.data)

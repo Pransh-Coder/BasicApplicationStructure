@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.Flow
 //An interface is like a contract - "telling what functions are available"
 interface MoviesRepositoryInterface {
 
-    suspend fun getMoviesListFromNetwork(): Resource<List<MoviesResponse>>      //why flow?
+    suspend fun getMoviesListFromNetwork(): Resource<List<MoviesResponse>>      //why flow? -- no need of flow as we are not getting data in form of stream
 
-    suspend fun getMoviesListFromLocalDB() : Flow<Resource<List<MoviesEntity>>>
+    suspend fun getMoviesListFromLocalDB() : Flow<Resource<List<MoviesEntity>>> //flow could work here becoz from db we could get the stream of data
 }
 
 /*

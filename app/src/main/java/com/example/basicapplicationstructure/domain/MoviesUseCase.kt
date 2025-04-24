@@ -20,21 +20,6 @@ class MoviesUseCase @Inject constructor(
         //its work of presentation layer
         val networkResponse = moviesRepositoryInterface.getMoviesListFromNetwork()
 
-        val mappedList = networkResponse.data?.map {
-            MoviesData(
-                title = it.title,
-                year = it.year,
-                released = it.released,
-                rated = it.rated,
-                runtime = it.runtime,
-                actors = it.actors,
-                language = it.language,
-                imdbRating = it.imdbRating,
-                type = it.type,
-                images = it.images
-            )
-        }
-
         when(networkResponse){
             is Resource.Error -> {
                 return Resource.Error(errorMessage = networkResponse.errorMessage)
@@ -43,9 +28,24 @@ class MoviesUseCase @Inject constructor(
                 return Resource.NoInternetException()
             }
             is Resource.Success -> {
+                val mappedList = networkResponse.data.map {
+                    MoviesData(
+                        title = it.title,
+                        year = it.year,
+                        released = it.released,
+                        rated = it.rated,
+                        runtime = it.runtime,
+                        actors = it.actors,
+                        language = it.language,
+                        imdbRating = it.imdbRating,
+                        type = it.type,
+                        images = it.images
+                    )
+                }
+
                 localDataSource.insertAllMoviesInDatabase(moviesMappedList = mappedList)
 
-                return Resource.Success(data = mappedList ?: emptyList())
+                return Resource.Success(data = mappedList)
             }
         }
 

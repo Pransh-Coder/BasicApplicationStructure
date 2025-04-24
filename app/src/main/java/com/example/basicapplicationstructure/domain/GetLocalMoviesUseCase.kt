@@ -36,6 +36,7 @@ class GetLocalMoviesUseCase @Inject constructor(private val moviesRepositoryInte
                             images = listOf(entity.image)
                         )
                     }
+
                     Resource.Success(mappedData)
                 }
             }
