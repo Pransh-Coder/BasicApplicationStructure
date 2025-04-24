@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 //Remote data source & Local data source Sigle responsibilty
+
+//A Repository is just a class that helps you manage and get data
+
+//The RepositoryImpl is the actual class that does the real work & says "how those functions work"
 class MoviesRepositoryImpl @Inject constructor(
     private val networkDataSource: NetworkDataSource,
     private val localDataSource: LocalDataSource,
