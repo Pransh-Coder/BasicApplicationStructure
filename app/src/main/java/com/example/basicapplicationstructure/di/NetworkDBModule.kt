@@ -20,8 +20,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 //better naming conventions, as it is only providing instances for network
-object NetworkModule {
+object NetworkDBModule {
 
+    //1. What is ApiInterface?
+    //It’s a Retrofit interface where you define your API endpoints using annotations like @GET, @POST, etc.
+    // & That’s what we actually need to make network calls
     @Provides
     @Singleton
     fun provideRetrofit(): ApiInterface {

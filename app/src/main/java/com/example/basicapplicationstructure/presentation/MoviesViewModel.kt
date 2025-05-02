@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basicapplicationstructure.domain.GetLocalMoviesUseCase
-import com.example.basicapplicationstructure.domain.MoviesUseCase
+import com.example.basicapplicationstructure.domain.GetRemoteMoviesUseCase
 import com.example.basicapplicationstructure.network.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
-    private val moviesUseCase: MoviesUseCase,
+    private val getRemoteMoviesUseCase: GetRemoteMoviesUseCase,
     val getLocalMoviesUseCase: GetLocalMoviesUseCase,
 ) : ViewModel() {
 
@@ -52,11 +52,12 @@ class MoviesViewModel @Inject constructor(
                         }
                     }
                     is Resource.NoInternetException -> {
+                        Log.e(TAG, "getMoviesList: err = ${it.errorMessage}", )
                         _state.update {
                             it.copy(isLoading = false)
                         }
 
-                        _errors.send("No Internet Connection!")
+                        //_errors.send("No Internet Connection!")
                     }
                     is Resource.Error -> {
                         _state.update {
@@ -71,7 +72,7 @@ class MoviesViewModel @Inject constructor(
 
     private fun fetchDataFromServer(){
         viewModelScope.launch {
-            val networkResponse = moviesUseCase.invoke()
+            val networkResponse = getRemoteMoviesUseCase.invoke()
 
             Log.e(TAG, "fetchDataFromServer: networkResponse = $networkResponse")
 
@@ -80,6 +81,7 @@ class MoviesViewModel @Inject constructor(
                     _state.value = state.value.copy(isLoading = false, moviesList = networkResponse.data)
                 }
                 is Resource.NoInternetException -> {
+                    Log.e(TAG, "getMoviesList: err = ${networkResponse.errorMessage}", )
                     _state.update {
                         it.copy(isLoading = false)
                     }

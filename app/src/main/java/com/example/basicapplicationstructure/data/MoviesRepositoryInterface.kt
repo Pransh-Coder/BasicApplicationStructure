@@ -24,7 +24,7 @@ Why separate Interface and Implementation?
        ** You can switch your data source without changing your whole app. **
 
        Suppose, earlier you were using Network Source to get the data, but tomorrow you don't want
-       to use API anymore instead FirebaseDatabase so, No problem! just create a new UserRepositoryImpl
+       to use API anymore instead FirebaseDatabase so, No problem! just create a new MoviesRepositoryImpl
        that uses FirebaseDatabase instead of API. The rest of the app doesn't change — it still talks to the same interface.
 
        2. Easier Testing

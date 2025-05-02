@@ -6,7 +6,7 @@ import com.example.basicapplicationstructure.data.localDataSource.LocalDataSourc
 import com.example.basicapplicationstructure.network.Resource
 import javax.inject.Inject
 
-class MoviesUseCase @Inject constructor(
+class GetRemoteMoviesUseCase @Inject constructor(
     private val moviesRepositoryInterface: MoviesRepositoryInterface,
     val localDataSource: LocalDataSource,
 ) {
@@ -43,7 +43,7 @@ class MoviesUseCase @Inject constructor(
                     )
                 }
 
-                localDataSource.insertAllMoviesInDatabase(moviesMappedList = mappedList)
+                localDataSource.insertAllMoviesInDatabase(moviesMappedList = networkResponse.data)
 
                 return Resource.Success(data = mappedList)
             }

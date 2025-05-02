@@ -1,5 +1,6 @@
 package com.example.basicapplicationstructure.data.localDataSource
 
+import com.example.basicapplicationstructure.data.remoteDataSource.MoviesResponse
 import com.example.basicapplicationstructure.network.Resource
 import com.example.basicapplicationstructure.presentation.MoviesData
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +20,7 @@ class LocalDataSource @Inject constructor(private val dao: MoviesDao) {
         }
     }
 
-    suspend fun insertAllMoviesInDatabase(moviesMappedList: List<MoviesData>?) {
+    suspend fun insertAllMoviesInDatabase(moviesMappedList: List<MoviesResponse>?) {
         val moviesEntityList = moviesMappedList?.map {
             MoviesEntity(
                 title = it.title,
