@@ -35,7 +35,7 @@ object NetworkDBModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://sample/")
+            .baseUrl("https://secure.geonames.org/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
