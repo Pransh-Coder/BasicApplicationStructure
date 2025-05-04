@@ -8,7 +8,7 @@ data class SearchResponse(
 )
 
 data class Geonames (
-    @SerializedName("adminCode1") val adminCode1 : Int,
+    @SerializedName("adminCode1") val adminCode1 : String,
     @SerializedName("lng") val lng : Double,
     @SerializedName("geonameId") val geonameId : Int,
     @SerializedName("toponymName") val toponymName : String,

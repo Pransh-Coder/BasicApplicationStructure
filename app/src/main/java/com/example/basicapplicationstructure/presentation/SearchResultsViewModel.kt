@@ -23,7 +23,7 @@ class SearchResultsViewModel @Inject constructor(private val useCase: GetSearchU
     private val _errors = Channel<String>()
     val errors = _errors.receiveAsFlow()
 
-    // TODO: caching the data from the network 
+    // TODO: caching the data from the network
     fun getSearchResults(nameStartsWith: String, maxRows: Int, userName: String){
         viewModelScope.launch {
             _state.update {
