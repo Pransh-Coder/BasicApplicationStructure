@@ -1,6 +1,6 @@
 package com.example.basicapplicationstructure.di
 
-import com.example.basicapplicationstructure.SearchRepositoryImpl
+import com.example.basicapplicationstructure.data.SearchRepositoryImpl
 import com.example.basicapplicationstructure.data.SearchRepositoryInterface
 import com.example.basicapplicationstructure.data.remoteDataSource.RemoteDataSource
 import com.example.basicapplicationstructure.network.ApiInterface

@@ -1,7 +1,5 @@
-package com.example.basicapplicationstructure
+package com.example.basicapplicationstructure.data
 
-import com.example.basicapplicationstructure.data.SearchRepositoryInterface
-import com.example.basicapplicationstructure.data.SearchResponse
 import com.example.basicapplicationstructure.data.remoteDataSource.RemoteDataSource
 import com.example.basicapplicationstructure.network.Resource
 import javax.inject.Inject
