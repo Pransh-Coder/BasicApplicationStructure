@@ -1,5 +1,6 @@
 package com.example.basicapplicationstructure.di
 
+import com.example.basicapplicationstructure.data.remoteDataSource.RemoteDataSource
 import com.example.basicapplicationstructure.network.ApiInterface
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkDBModule {
+object NetworkModule {
 
     @Provides
     @Singleton
@@ -35,10 +36,17 @@ object NetworkDBModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://sample/")
+            .baseUrl("https://api.jikan.moe/v4/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(ApiInterface::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideRemoteDataSource(apiInterface: ApiInterface): RemoteDataSource{
+        return RemoteDataSource(apiInterface)
+    }
+
 }
