@@ -11,6 +11,7 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
 
     private var throwErr: Boolean = false
     private var noInternetConnection = false
+    private var isAppLaunchedForFirstTime = false
 
     private val fakeMoviesListFromDB = mutableListOf<MoviesEntity>(
         MoviesEntity(
@@ -161,7 +162,12 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
                 emit(Resource.NoInternetException())
             }
             else{
-                emit(Resource.Success(fakeMoviesListFromDB))
+                if (isAppLaunchedForFirstTime){
+                    emit(Resource.Success(emptyList()))
+                }
+                else{
+                    emit(Resource.Success(fakeMoviesListFromDB))
+                }
             }
         }
     }
@@ -174,4 +180,7 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
         noInternetConnection = noInternetConnection.not()
     }
 
+    fun isAppLaunchedInitially(){
+        isAppLaunchedForFirstTime = isAppLaunchedForFirstTime.not()
+    }
 }

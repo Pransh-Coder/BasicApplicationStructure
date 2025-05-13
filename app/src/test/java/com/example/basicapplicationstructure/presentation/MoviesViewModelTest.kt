@@ -9,6 +9,8 @@ import com.example.basicapplicationstructure.data.repository.FakeMoviesRepositor
 import com.example.basicapplicationstructure.domain.GetLocalMoviesUseCase
 import com.example.basicapplicationstructure.domain.GetRemoteMoviesUseCase
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
+import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -35,6 +37,9 @@ class MoviesViewModelTest {
 
     @Before
     fun setUp(){
+        mockkStatic(Log::class)
+        // Arrange
+        every { Log.e(any(), any()) } returns 0
         fakeMoviesRepository = FakeMoviesRepository()
         //fakeMoviesDaoImpl = FakeMoviesDaoImpl()
         moviesViewModel = MoviesViewModel(
@@ -62,6 +67,20 @@ class MoviesViewModelTest {
        /*moviesViewModel.state.value {
            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
        }*/
+    }
+
+    @Test
+    fun `CHECK THE MOVIES DATA AFTER NETWORK SUCCEES CALL` () = runBlocking {
+
+        assertInitialValues()
+        fakeMoviesRepository.isAppLaunchedInitially()
+        moviesViewModel.getMoviesList()
+        print("CHECK THE MOVIES DATA AFTER API SUCCEES CALL: ${moviesViewModel.state.value.moviesList}")
+        assertThat(moviesViewModel.state.value.moviesList?.isNotEmpty()).isTrue()
+
+        /*moviesViewModel.state.value {
+            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
+        }*/
     }
 
     /*@After
