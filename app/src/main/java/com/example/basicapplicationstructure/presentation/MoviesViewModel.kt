@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val getRemoteMoviesUseCase: GetRemoteMoviesUseCase,
-    val getLocalMoviesUseCase: GetLocalMoviesUseCase,
+    private val getLocalMoviesUseCase: GetLocalMoviesUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MoviesState(isLoading = false))
@@ -29,35 +29,39 @@ class MoviesViewModel @Inject constructor(
     private val _errors = Channel<String>()
     val error = _errors.receiveAsFlow()
 
-    init {
+    /*init {
         getMoviesList()
-    }
+    }*/
 
     fun getMoviesList(){
+        println("inside getMoviesList")
         viewModelScope.launch {
             _state.update {
                 it.copy(isLoading = true)
             }
             getLocalMoviesUseCase.invoke().collectLatest {
-                Log.e(TAG, "getMoviesList: it = $it")
+                //Log.e(TAG, "getMoviesList: it = $it")
                 when(it){
                     is Resource.Success -> {
                         if (it.data.isNotEmpty()){
-                            Log.e(TAG, "getMoviesList: data is not empty...", )
+                            //Log.e(TAG, "getMoviesList: data is not empty...", )
+                            println("getMoviesList: data is not empty... ${it.data}")
                             _state.value = state.value.copy(isLoading = false, moviesList = it.data)
                         }
                         else{
-                            Log.e(TAG, "getMoviesList: data is empty fetching from network", )
+                            //Log.e(TAG, "getMoviesList: data is empty fetching from network", )
+                            println("getMoviesList: data is empty fetching from network")
                             fetchDataFromServer()
                         }
                     }
                     is Resource.NoInternetException -> {
-                        Log.e(TAG, "getMoviesList: err = ${it.errorMessage}", )
+                        //Log.e(TAG, "getMoviesList: err = ${it.errorMessage}", )
+                        println()
                         _state.update {
                             it.copy(isLoading = false)
                         }
 
-                        //_errors.send("No Internet Connection!")
+                        _errors.send("No Internet Connection!")
                     }
                     is Resource.Error -> {
                         _state.update {
