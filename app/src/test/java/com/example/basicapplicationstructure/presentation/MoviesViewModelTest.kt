@@ -20,10 +20,13 @@ import org.junit.Test
 
 class MoviesViewModelTest {
 
+    //SUT
     private lateinit var moviesViewModel: MoviesViewModel
+
     private lateinit var fakeMoviesRepository: FakeMoviesRepository
     private lateinit var fakeMoviesDaoImpl: FakeMoviesDaoImpl
 
+    //This code is required to test viewModelScope.launch coroutine
     @ExperimentalCoroutinesApi
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -33,11 +36,14 @@ class MoviesViewModelTest {
 
     @Before
     fun setUp(){
+        //This block is needed to make log statements to start working in compose
         mockkStatic(Log::class)
         // Arrange
         every { Log.e(any(), any()) } returns 0
+
+
         fakeMoviesRepository = FakeMoviesRepository()
-        //fakeMoviesDaoImpl = FakeMoviesDaoImpl()
+
         moviesViewModel = MoviesViewModel(
             getRemoteMoviesUseCase = GetRemoteMoviesUseCase(
                 moviesRepositoryInterface = fakeMoviesRepository,

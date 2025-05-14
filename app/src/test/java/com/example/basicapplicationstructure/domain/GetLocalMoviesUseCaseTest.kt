@@ -10,8 +10,9 @@ import org.junit.Before
 import org.junit.Test
 
 class GetLocalMoviesUseCaseTest {
-
+    //System Under Test (SUT)
     private lateinit var getLocalMoviesUseCase: GetLocalMoviesUseCase
+
     private lateinit var fakeMoviesRepository: FakeMoviesRepository
 
     //this would run this setUp func before every single testcase & will be used to setup things
@@ -19,6 +20,7 @@ class GetLocalMoviesUseCaseTest {
     @Before
     fun setUp(){
         fakeMoviesRepository = FakeMoviesRepository()
+        //creating an obj for SUT
         getLocalMoviesUseCase = GetLocalMoviesUseCase(moviesRepositoryInterface = fakeMoviesRepository)
     }
 
@@ -30,7 +32,7 @@ class GetLocalMoviesUseCaseTest {
 
             assertTrue(it is Resource.Success)
             assertThat(it.data?.get(0)?.title).isEqualTo("Avatar")
-            assertTrue(it.data?.get(0)?.year == "2009")
+            assertThat(it.data?.get(0)?.year).isEqualTo("2009")
             //it.data?.get(0)?.title == "Avatar" && it.data?.get(0)?.year == "2009
         }
     }

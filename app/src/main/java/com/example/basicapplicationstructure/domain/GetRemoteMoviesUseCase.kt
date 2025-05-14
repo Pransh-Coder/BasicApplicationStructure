@@ -48,7 +48,5 @@ class GetRemoteMoviesUseCase @Inject constructor(
                 return Resource.Success(data = mappedList)
             }
         }
-
     }
-
 }

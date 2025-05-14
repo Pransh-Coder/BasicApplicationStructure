@@ -1,6 +1,5 @@
 package com.example.basicapplicationstructure.data.repository
 
-import android.util.Log
 import com.example.basicapplicationstructure.data.MoviesRepositoryInterface
 import com.example.basicapplicationstructure.data.localDataSource.MoviesEntity
 import com.example.basicapplicationstructure.data.remoteDataSource.MoviesResponse
@@ -11,7 +10,7 @@ import kotlinx.coroutines.flow.flow
 class FakeMoviesRepository : MoviesRepositoryInterface {
 
     private var throwErr: Boolean = false
-    private var throwNetworkwErr: Boolean = false
+    private var throwNetworkErr: Boolean = false
     private var noInternetConnection = false
     private var noInternetConnectionForNetwork = false
     private var isAppLaunchedForFirstTime = false
@@ -145,8 +144,8 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
     )
 
     override suspend fun getMoviesListFromNetwork(): Resource<List<MoviesResponse>> {
-        if (throwNetworkwErr){
-            println("inside getMoviesListFromNetwork:in FakeRepository throwNetworkwErr = $throwNetworkwErr")
+        if (throwNetworkErr){
+            println("inside getMoviesListFromNetwork:in FakeRepository throwNetworkwErr = $throwNetworkErr")
             return Resource.Error(errorMessage = "Exception in API call")
         }
         else if(noInternetConnectionForNetwork) {
@@ -183,7 +182,7 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
     }
 
     fun setUnsetNetworkError(){
-        throwNetworkwErr = throwNetworkwErr.not()
+        throwNetworkErr = throwNetworkErr.not()
     }
 
     fun setNoInternetErr(){
