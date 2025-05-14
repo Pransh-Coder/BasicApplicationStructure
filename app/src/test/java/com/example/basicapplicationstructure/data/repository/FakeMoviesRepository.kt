@@ -1,5 +1,6 @@
 package com.example.basicapplicationstructure.data.repository
 
+import android.util.Log
 import com.example.basicapplicationstructure.data.MoviesRepositoryInterface
 import com.example.basicapplicationstructure.data.localDataSource.MoviesEntity
 import com.example.basicapplicationstructure.data.remoteDataSource.MoviesResponse
@@ -10,7 +11,9 @@ import kotlinx.coroutines.flow.flow
 class FakeMoviesRepository : MoviesRepositoryInterface {
 
     private var throwErr: Boolean = false
+    private var throwNetworkwErr: Boolean = false
     private var noInternetConnection = false
+    private var noInternetConnectionForNetwork = false
     private var isAppLaunchedForFirstTime = false
 
     private val fakeMoviesListFromDB = mutableListOf<MoviesEntity>(
@@ -142,10 +145,12 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
     )
 
     override suspend fun getMoviesListFromNetwork(): Resource<List<MoviesResponse>> {
-        if (throwErr){
+        if (throwNetworkwErr){
+            println("inside getMoviesListFromNetwork:in FakeRepository throwNetworkwErr = $throwNetworkwErr")
             return Resource.Error(errorMessage = "Exception in API call")
         }
-        else if(noInternetConnection) {
+        else if(noInternetConnectionForNetwork) {
+            println("inside getMoviesListFromNetwork:in FakeRepository noInternetConnectionForNetwork = $noInternetConnectionForNetwork")
             return Resource.NoInternetException()
         }
         else{
@@ -154,6 +159,7 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
     }
 
     override suspend fun getMoviesListFromLocalDB(): Flow<Resource<List<MoviesEntity>>> {
+        println("getMoviesListFromLocalDB: FakeRepo isAppLaunchedForFirstTime = $isAppLaunchedForFirstTime" )
         return flow {
             if (throwErr){
                 emit(Resource.Error(errorMessage = "Excep in DB"))
@@ -176,8 +182,15 @@ class FakeMoviesRepository : MoviesRepositoryInterface {
         throwErr = throwErr.not()
     }
 
+    fun setUnsetNetworkError(){
+        throwNetworkwErr = throwNetworkwErr.not()
+    }
+
     fun setNoInternetErr(){
         noInternetConnection = noInternetConnection.not()
+    }
+    fun setNoInternetErrForNetwork(){
+        noInternetConnectionForNetwork = noInternetConnectionForNetwork.not()
     }
 
     fun isAppLaunchedInitially(){

@@ -56,7 +56,7 @@ class MoviesViewModel @Inject constructor(
                     }
                     is Resource.NoInternetException -> {
                         //Log.e(TAG, "getMoviesList: err = ${it.errorMessage}", )
-                        println()
+                        println("Internet err from DB")
                         _state.update {
                             it.copy(isLoading = false)
                         }
@@ -86,12 +86,14 @@ class MoviesViewModel @Inject constructor(
                 }
                 is Resource.NoInternetException -> {
                     Log.e(TAG, "getMoviesList: err = ${networkResponse.errorMessage}", )
+                    println("getMoviesList: NoInternet Err from SERVER ")
                     _state.update {
                         it.copy(isLoading = false)
                     }
-                    _errors.send("No Internet Connection!")
+                    _errors.send("No Internet Connection From Network!")
                 }
                 is Resource.Error -> {
+                    println("getMoviesList: Err from Network errorMessage = ${networkResponse.errorMessage}")
                     _state.update {
                         it.copy(isLoading = false)
                     }

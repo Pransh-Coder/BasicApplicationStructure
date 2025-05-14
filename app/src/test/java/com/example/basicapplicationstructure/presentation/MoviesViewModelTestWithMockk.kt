@@ -12,13 +12,17 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class MoviesViewModelTest {
+class MoviesViewModelTestWithMockk {
 
     private lateinit var moviesViewModel: MoviesViewModel
     private lateinit var fakeMoviesRepository: FakeMoviesRepository
@@ -53,16 +57,30 @@ class MoviesViewModelTest {
     }
 
     @Test
-    fun `MOVIES DATA AFTER DB SUCCESS CALL` () = runBlocking {
+    fun `CHECK THE MOVIES DATA AFTER DB SUCCEES CALL` () = runBlocking {
 
         assertInitialValues()
         moviesViewModel.getMoviesList()
-        print("CHECK THE MOVIES DATA AFTER DB SUCCESS CALL: ${moviesViewModel.state.value.moviesList}")
+        print("CHECK THE MOVIES DATA AFTER API SUCCEES CALL: ${moviesViewModel.state.value.moviesList}")
         assertThat(moviesViewModel.state.value.moviesList?.isNotEmpty()).isTrue()
 
        /*moviesViewModel.state.value {
            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
        }*/
+    }
+
+    @Test
+    fun `CHECK THE MOVIES DATA AFTER NETWORK SUCCEES CALL` () = runBlocking {
+
+        assertInitialValues()
+        fakeMoviesRepository.isAppLaunchedInitially()
+        moviesViewModel.getMoviesList()
+        print("CHECK THE MOVIES DATA AFTER API SUCCEES CALL: ${moviesViewModel.state.value.moviesList}")
+        assertThat(moviesViewModel.state.value.moviesList?.isNotEmpty()).isTrue()
+
+        /*moviesViewModel.state.value {
+            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
+        }*/
     }
 
     /*@After
@@ -78,7 +96,7 @@ class MoviesViewModelTest {
             assertThat(it == "Exception in API call").isTrue()
         }*/
         //assertThat(moviesViewModel.state.value.moviesList?.isEmpty()).isTrue()
-       fakeMoviesRepository.setUnsetError()
+       //fakeMoviesRepository.setUnsetError()
 
        moviesViewModel.getMoviesList()
        moviesViewModel.error.take(1).collect {
@@ -102,46 +120,6 @@ class MoviesViewModelTest {
             assertThat(it).isEqualTo("No Internet Connection!")
         }
         assertThat(moviesViewModel.state.value.moviesList?.isEmpty()).isTrue()
-    }
-
-    @Test
-    fun `MOVIES DATA AFTER NETWORK SUCCESS CALL` () = runBlocking {
-
-        assertInitialValues()
-        fakeMoviesRepository.isAppLaunchedInitially()
-        moviesViewModel.getMoviesList()
-        print("CHECK THE MOVIES DATA AFTER API SUCCESS CALL: ${moviesViewModel.state.value.moviesList}")
-        assertThat(moviesViewModel.state.value.moviesList?.size).isNotEqualTo(0)
-
-        /*moviesViewModel.state.value {
-            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
-        }*/
-    }
-
-    @Test
-    fun `CHECK NETWORK ERROR`() = runBlocking {
-
-        assertInitialValues()
-        fakeMoviesRepository.isAppLaunchedInitially()
-        fakeMoviesRepository.setUnsetNetworkError()
-        moviesViewModel.getMoviesList()
-        moviesViewModel.error.take(1).collect {
-            assertThat(it).isEqualTo("Exception in API call")
-        }
-        assertThat(moviesViewModel.state.value.moviesList?.size).isEqualTo(0)
-    }
-
-    @Test
-    fun `CHECK NO INTERNET NETWORK ERROR`() = runBlocking {
-
-        assertInitialValues()
-        fakeMoviesRepository.isAppLaunchedInitially()
-        fakeMoviesRepository.setNoInternetErrForNetwork()
-        moviesViewModel.getMoviesList()
-        moviesViewModel.error.take(1).collect {
-            assertThat(it).isEqualTo("No Internet Connection From Network!")
-        }
-        assertThat(moviesViewModel.state.value.moviesList?.size).isEqualTo(0)
     }
 
     companion object{
