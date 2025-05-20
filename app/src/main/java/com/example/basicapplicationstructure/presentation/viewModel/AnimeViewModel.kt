@@ -40,6 +40,7 @@ class AnimeViewModel @Inject constructor(
     }
 
     init {
+        //todo remove it should not be called in constructor, not a good approach, it should be directly called from view
         getAnimeListFromNetwork()
     }
 
