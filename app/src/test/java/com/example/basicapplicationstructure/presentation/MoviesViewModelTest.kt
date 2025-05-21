@@ -12,6 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -36,37 +37,40 @@ class MoviesViewModelTest {
 
     @Before
     fun setUp(){
-        //This block is needed to make log statements to start working in compose
+        //This block is needed to make log statements to start working in test environment
         mockkStatic(Log::class)
         // Arrange
         every { Log.e(any(), any()) } returns 0
 
-
         fakeMoviesRepository = FakeMoviesRepository()
+        fakeMoviesDaoImpl = FakeMoviesDaoImpl()
 
         moviesViewModel = MoviesViewModel(
             getRemoteMoviesUseCase = GetRemoteMoviesUseCase(
                 moviesRepositoryInterface = fakeMoviesRepository,
-                localDataSource = LocalDataSource(dao = FakeMoviesDaoImpl())
+                localDataSource = LocalDataSource(dao = fakeMoviesDaoImpl)
             ),
             getLocalMoviesUseCase = GetLocalMoviesUseCase(fakeMoviesRepository)
         )
     }
 
     fun assertInitialValues() = runBlocking {
-        assertThat(moviesViewModel.state.value.isLoading == false).isTrue()
-        assertThat(moviesViewModel.state.value.moviesList?.isEmpty()).isTrue()
+        assertThat(moviesViewModel.state.value.isLoading).isEqualTo(false)
+        assertThat(moviesViewModel.state.value.moviesList?.size).isEqualTo(0)
     }
 
     @Test
-    fun `MOVIES DATA AFTER DB SUCCESS CALL` () = runBlocking {
+    fun `MOVIES DATA AFTER DB SUCCESS CALL` () = runBlocking<Unit> {
 
         assertInitialValues()
-        moviesViewModel.getMoviesList()
-        print("CHECK THE MOVIES DATA AFTER DB SUCCESS CALL: ${moviesViewModel.state.value.moviesList}")
-        assertThat(moviesViewModel.state.value.moviesList?.isNotEmpty()).isTrue()
 
-       /*moviesViewModel.state.value {
+        moviesViewModel.getMoviesList()
+
+        print("CHECK THE MOVIES DATA AFTER DB SUCCESS CALL: ${moviesViewModel.state.value.moviesList}")
+        assertThat(moviesViewModel.state.value.moviesList?.size).isNotEqualTo(0)
+
+       //Alternate way for getting the data & checking its value by take(1) flow will not collect indefinitely
+       /*moviesViewModel.state.take(1).collectLatest {
            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
        }*/
     }
@@ -80,19 +84,16 @@ class MoviesViewModelTest {
     fun `CHECK THE DB ERROR`()  = runBlocking {
 
         assertInitialValues()
-       /* moviesViewModel.error.collectLatest {
-            assertThat(it == "Exception in API call").isTrue()
-        }*/
-        //assertThat(moviesViewModel.state.value.moviesList?.isEmpty()).isTrue()
-       fakeMoviesRepository.setUnsetError()
 
-       moviesViewModel.getMoviesList()
-       moviesViewModel.error.take(1).collect {
-            assertThat(it).isEqualTo("Excep in DB")
-       }
-        //assertThat(fakeMoviesDaoImpl.getAllMoviesList().size).isEqualTo(0)
+        fakeMoviesRepository.setUnsetError()
 
-        //assertThat(result.moviesList?.size).isEqualTo(3)
+        moviesViewModel.getMoviesList()
+
+        moviesViewModel.error.take(1).collect {
+             assertThat(it).isEqualTo("Excep in DB")
+        }
+
+        assertThat(fakeMoviesDaoImpl.getAllMoviesList().size).isEqualTo(0)
     }
 
     @Test
@@ -107,20 +108,25 @@ class MoviesViewModelTest {
         moviesViewModel.error.take(1).collect {
             assertThat(it).isEqualTo("No Internet Connection!")
         }
-        assertThat(moviesViewModel.state.value.moviesList?.isEmpty()).isTrue()
+
+        assertThat(moviesViewModel.state.value.moviesList?.size).isEqualTo(0)
     }
 
     @Test
     fun `MOVIES DATA AFTER NETWORK SUCCESS CALL` () = runBlocking {
 
         assertInitialValues()
+
         fakeMoviesRepository.isAppLaunchedInitially()
+
         moviesViewModel.getMoviesList()
+
         print("CHECK THE MOVIES DATA AFTER API SUCCESS CALL: ${moviesViewModel.state.value.moviesList}")
         assertThat(moviesViewModel.state.value.moviesList?.size).isNotEqualTo(0)
 
-        /*moviesViewModel.state.value {
-            assertThat(it.moviesList.isNullOrEmpty().not()).isEqualTo(true)
+        //Alternate way for getting the data & checking its value by take(1) flow will not collect indefinitely
+        /*moviesViewModel.state.take(1).collectLatest {
+            assertThat(it.moviesList?.size).isNotEqualTo(0)
         }*/
     }
 
@@ -128,12 +134,17 @@ class MoviesViewModelTest {
     fun `CHECK NETWORK ERROR`() = runBlocking {
 
         assertInitialValues()
+
         fakeMoviesRepository.isAppLaunchedInitially()
+
         fakeMoviesRepository.setUnsetNetworkError()
+
         moviesViewModel.getMoviesList()
+
         moviesViewModel.error.take(1).collect {
             assertThat(it).isEqualTo("Exception in API call")
         }
+
         assertThat(moviesViewModel.state.value.moviesList?.size).isEqualTo(0)
     }
 
@@ -141,12 +152,17 @@ class MoviesViewModelTest {
     fun `CHECK NO INTERNET NETWORK ERROR`() = runBlocking {
 
         assertInitialValues()
+
         fakeMoviesRepository.isAppLaunchedInitially()
+
         fakeMoviesRepository.setNoInternetErrForNetwork()
+
         moviesViewModel.getMoviesList()
+
         moviesViewModel.error.take(1).collect {
             assertThat(it).isEqualTo("No Internet Connection From Network!")
         }
+
         assertThat(moviesViewModel.state.value.moviesList?.size).isEqualTo(0)
     }
 
