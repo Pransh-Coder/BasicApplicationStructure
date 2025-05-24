@@ -1,0 +1,64 @@
+package com.example.basicapplicationstructure.di
+
+import android.content.Context
+import androidx.room.Room
+import com.example.basicapplicationstructure.data.localDataSource.MoviesAppDatabase
+import com.example.basicapplicationstructure.network.ApiInterface
+import com.google.gson.GsonBuilder
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+//better naming conventions, as it is only providing instances for network
+object TestNetworkDBModule {
+
+    //1. What is ApiInterface?
+    //It’s a Retrofit interface where you define your API endpoints using annotations like @GET, @POST, etc.
+    // & That’s what we actually need to make network calls
+    @Provides
+    @Singleton
+    fun provideRetrofit(): ApiInterface {
+        val gson = GsonBuilder().create()
+
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
+
+        val okHttpClient = OkHttpClient()
+            .newBuilder()
+            .addInterceptor(httpLoggingInterceptor)
+            .connectTimeout(600000, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("https://dummyjson.com/c/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(ApiInterface::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providesAppDataBase(@ApplicationContext context: Context): MoviesAppDatabase {
+        //for testing we are using inMemoryDatabaseBuilder
+        return Room.inMemoryDatabaseBuilder(
+                context = context,
+                klass = MoviesAppDatabase::class.java,
+            )
+            .fallbackToDestructiveMigration(false)
+            .build()
+    }
+}

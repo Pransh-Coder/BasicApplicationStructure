@@ -5,6 +5,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,7 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -36,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.basicapplicationstructure.presentation.MoviesData
+import com.example.basicapplicationstructure.presentation.MoviesState
 import com.example.basicapplicationstructure.presentation.MoviesViewModel
 import com.example.basicapplicationstructure.ui.theme.BasicApplicationStructureTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,56 +71,82 @@ class MainActivity : ComponentActivity() {
             }
 
             BasicApplicationStructureTheme {
-                Scaffold(modifier = Modifier.padding(all =  20.dp)) { innerPadding ->
-                   /* Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )*/
-
-                    if (state.isLoading){
-                        Column(
-                            modifier = Modifier
-                                .padding(innerPadding)
-                                .fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                MoviesMainScreenComposable(
+                    state = state,
+                    onBackPressed = {
+                        onBackPressedDispatcher.onBackPressed()
                     }
-                    else{
-                        MoviesListComposable(
-                            modifier = Modifier.padding(innerPadding),
-                            moviesList = state.moviesList
-                        )
-                    }
-                }
+                )
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+private fun MoviesMainScreenComposable(state: MoviesState, onBackPressed: () -> Unit) {
+    Scaffold(
+        topBar = {
+            Toolbar(
+                toolsText = "Movies Data",
+                onBackPressed = {
+                    onBackPressed.invoke()
+                }
+            )
+        }
+    ) { innerPadding ->
+        if (state.isLoading) {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            MoviesListComposable(
+                modifier = Modifier.padding(innerPadding),
+                moviesList = state.moviesList
+            )
+        }
+    }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun GreetingPreview() {
-    BasicApplicationStructureTheme {
-        Greeting("Android")
+fun Toolbar(toolsText:String = "", onBackPressed:() -> Unit = {}) {
+    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(5.dp), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(0.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Image(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "backArrow",
+                modifier = Modifier.clickable{
+                    onBackPressed.invoke()
+                }
+            )
+            Text(
+                text = toolsText,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                fontSize = 25.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
+
 }
 
 @Composable
 fun MoviesListComposable(modifier: Modifier = Modifier, moviesList: List<MoviesData>? = listOf<MoviesData>()) {
 
     LazyColumn(modifier = modifier.fillMaxWidth()) {
-        item {
+        /*item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text(
                     text = "Movies Data",
@@ -122,8 +157,7 @@ fun MoviesListComposable(modifier: Modifier = Modifier, moviesList: List<MoviesD
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
                 )
             }
-        }
-
+        }*/
         items(moviesList?:emptyList<MoviesData>()) {
             MovieItem(it)
         }
@@ -136,7 +170,8 @@ fun MovieItem(movie: MoviesData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 16.dp),
+            .padding(vertical = 16.dp, horizontal = 16.dp)
+            .testTag("movieItem"),
         elevation = CardDefaults.cardElevation(),
         colors = CardDefaults.cardColors(containerColor = Color.LightGray),
     ){
@@ -161,7 +196,8 @@ fun MovieItem(movie: MoviesData) {
                 textDecoration = TextDecoration.Underline,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = Color.Red
+                color = Color.Red,
+                modifier = Modifier.testTag("movieItemText")
             )
 
             Text(
@@ -252,7 +288,8 @@ private fun PreviewMovieItem() {
 
 @Preview
 @Composable
-private fun PreviewMoviesListComposable() {
+private fun PreviewMoviesMainScreenComposable() {
+
     val mockData = MoviesData(
         title = "Avatar",
         year = "2022",
@@ -272,8 +309,9 @@ private fun PreviewMoviesListComposable() {
 
         )
     )
-
     val list = listOf<MoviesData>(mockData,mockData,mockData,mockData,mockData,mockData,mockData)
 
-    MoviesListComposable(moviesList = list)
+    val moviesState = MoviesState(isLoading = false, moviesList = list)
+
+    MoviesMainScreenComposable(state = moviesState, onBackPressed = {})
 }
